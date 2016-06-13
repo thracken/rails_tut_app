@@ -1,7 +1,54 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  def setup
+    @user = User.new(name: "Sample User", email: "user@example.com")
+  end
+
+  test "Should be valid" do
+    assert @user.valid?
+  end
+
+  test "Name should be present" do
+    @user.name = "     "
+    assert_not @user.valid?
+  end
+
+  test "Email should be present" do
+    @user.email = "     "
+    assert_not @user.valid?
+  end
+
+  test "Name shouldn't be too long" do
+    @user.name = "a" * 51
+    assert_not @user.valid?
+  end
+
+  test "Email shouldn't be too long" do
+    @user.name = "a" * 244 + "@example.com"
+    assert_not @user.valid?
+  end
+
+  test "email validation accepts a valid address" do
+    valid_emails = ["user@example.com", "USER@foo.COM", "A_US-ER@foo.bar.org", "first.last@foo.jp", "alice+bob@baz.cn"]
+    valid_emails.each do |address|
+      @user.email = address
+      assert @user.valid?, "#{address.inspect} should be valid"
+    end
+  end
+
+  test "email validation should reject invalid addresses" do
+    invalid_emails = ["user@example,com", "user_at_foo.org", "user.name@example.", "foo@bar_baz.com", "foo@bar+baz.com"]
+    invalid_emails.each do |address|
+      @user.email = address
+      assert_not @user.valid? "#{address.inspect} should be invalid"
+    end
+  end
+
+  test "email is unique" do
+    duplicate_user = @user.dup
+    duplicate_user.email = @user.email.upcase
+    @user.save
+    assert_not duplicate_user.valid?
+  end
 end
