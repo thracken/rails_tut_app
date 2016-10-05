@@ -24,10 +24,11 @@ class UsersControllerTest < ActionController::TestCase
     assert_not @other_user.reload.admin?
   end
 
-  test "should fail destroy when not logged in" do
+  test "should redirect destroy when not logged in" do
     assert_no_difference 'User.count' do
-      assert_raises(NoMethodError) {delete :destroy, id: @user}
+      delete user_path(@user)
     end
+    assert_redirected_to login_url
   end
 
   test "should redirect destroy when logged in as a non-admin" do
